@@ -9,7 +9,7 @@ VALID_SVC = list()
 
 
 @click.group()
-@click.version_option(package_name='kr')
+@click.version_option(package_name='cm')
 def cli():
     """
     (C)ommand (L)ine (I)nterface
@@ -90,6 +90,9 @@ def alter():
 @kr.command()
 @click.argument('service', type=str, nargs=1)
 def delete(service):
+    """
+    Delete a keyring entry for a specified service.
+    """
     # Read config.ini
     config = configparser.ConfigParser()
     config.read('config.ini')
