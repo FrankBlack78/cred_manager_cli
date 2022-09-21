@@ -93,7 +93,7 @@ def show(service):
     if svc not in config:
         click.echo('Service is not registered.')
         return 1
-    # User confirmation to add credentials to os keyring
+    # User confirmation to show credentials from os keyring
     click.echo('You are about to show your credentials on screen (including password).')
     confirmation = click.confirm('Proceed?')
     if confirmation is False:
@@ -108,8 +108,29 @@ def show(service):
 
 
 @kr.command()
-def alter():
-    click.echo('Hello World!')
+@click.argument('service', type=str, nargs=1)
+def alter(service):
+    """
+    Alter the keyring password for a specified service.
+    Altering the username is not (yet) possible. For that delete the keyring entry
+    for the specified service and initialize it again.
+    """
+    svc = service
+    # Read config.ini
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    # Check if service is registered
+    if svc not in config:
+        click.echo('Service is not registered.')
+        return 1
+    # Retrieve credentials from keyring
+    cred = keyring.get_credential(service_name=svc, username=None)
+    usr = cred.username
+    pwd = click.prompt('Enter a valid password', type=str, hide_input=True)
+    # Write credentials to os keyring
+    keyring.set_password(service_name=svc, username=usr, password=pwd)
+    click.echo('Saved credentials in os keyring.')
+    return 0
 
 
 @kr.command()
