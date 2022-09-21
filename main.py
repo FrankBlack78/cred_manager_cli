@@ -93,15 +93,12 @@ def show(service):
     if svc not in config:
         click.echo('Service is not registered.')
         return 1
-
     # User confirmation to add credentials to os keyring
-    click.echo('You are about to add credentials to your os keyring.')
+    click.echo('You are about to show your credentials on screen (including password).')
     confirmation = click.confirm('Proceed?')
     if confirmation is False:
         click.echo('Process terminated.')
         return 1
-
-
     # Retrieve credentials from keyring
     cred = keyring.get_credential(service_name=svc, username=None)
     # Print out retrieved credentials
