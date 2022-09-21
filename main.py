@@ -73,13 +73,41 @@ def init(service):
     config[svc] = {'Username': usr}
     with open('config.ini', 'w') as configfile:
         config.write(configfile)
-    # Write credentials to os keyring (Deactivated temporary)
+    # Write credentials to os keyring
     keyring.set_password(service_name=svc, username=usr, password=pwd)
+    click.echo('Saved credentials in os keyring.')
+    return 0
 
 
 @kr.command()
-def show():
-    click.echo('Hello World!')
+@click.argument('service', type=str, nargs=1)
+def show(service):
+    """
+    Show a keyring entry for a specified service.
+    """
+    svc = service
+    # Read config.ini
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+    # Check if service is registered
+    if svc not in config:
+        click.echo('Service is not registered.')
+        return 1
+
+    # User confirmation to add credentials to os keyring
+    click.echo('You are about to add credentials to your os keyring.')
+    confirmation = click.confirm('Proceed?')
+    if confirmation is False:
+        click.echo('Process terminated.')
+        return 1
+
+
+    # Retrieve credentials from keyring
+    cred = keyring.get_credential(service_name=svc, username=None)
+    # Print out retrieved credentials
+    click.echo('User name is {}'.format(cred.username))
+    click.echo('Password is {}'.format(cred.password))
+    return 0
 
 
 @kr.command()
@@ -96,7 +124,7 @@ def delete(service):
     # Read config.ini
     config = configparser.ConfigParser()
     config.read('config.ini')
-    # Check if service is already registered
+    # Check if service is registered
     if service not in config:
         click.echo('Service is not registered.')
         return 1
@@ -115,3 +143,5 @@ def delete(service):
         config.write(configfile)
     # Delete credentials from os keyring (Deactivated temporary)
     keyring.delete_password(service_name=svc, username=usr)
+    click.echo('Deleted credentials from os keyring.')
+    return 0
